@@ -44,6 +44,7 @@ option  | default | comment
 --spacing-vert | 0 | spacing vertical
 --spacing-horiz | 0 | spacing horizontal
 --monochrome | | disable anti-aliasing
+--hinting-mode | auto | hinting mode: auto, native, none
 --max-texture-count | | maximum generated texture count (unlimited if not set)
 --texture-name-suffix | index_aligned | texture name suffix: "index_aligned", "index" or "none"
 
@@ -93,6 +94,12 @@ git clone https://github.com/vladimirgamalyan/fontbm.git
 cd fontbm
 cmake .
 make
+```
+
+For small pixel fonts, this is a useful combination to test first:
+
+```bash
+fontbm --font-file pixel.ttf --output pixel --font-size 11 --monochrome --hinting-mode native
 ```
 
 ## Using AI agents

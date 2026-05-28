@@ -28,6 +28,12 @@ struct Config
         None
     };
 
+    enum class HintingMode {
+        Auto,
+        Native,
+        None
+    };
+
     struct Color
     {
         std::uint8_t r;
@@ -89,6 +95,7 @@ struct Config
     std::uint32_t maxTextureCount = 0;
     bool useMaxTextureCount = false;
     bool monochrome = false;
+    HintingMode hintingMode = HintingMode::Auto;
     bool cropTexturesWidth = false;
     bool cropTexturesHeight = false;
     bool verbose = false;

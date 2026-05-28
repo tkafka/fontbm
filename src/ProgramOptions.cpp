@@ -27,6 +27,7 @@ Config ProgramOptions::parseCommandLine(int argc, char* argv[])
         std::string dataFormat;
         std::string kerningPairs;
         std::string textureNameSuffix;
+        std::string hintingMode;
 
         cxxopts::Options options("fontbm", "Command line bitmap font generator, compatible with bmfont");
         options.add_options()
@@ -47,6 +48,7 @@ Config ProgramOptions::parseCommandLine(int argc, char* argv[])
             ("data-format", R"(output data file format: "txt", "xml", "json", "bin", default: "txt")", cxxopts::value<std::string>(dataFormat)->default_value("txt"))
             ("kerning-pairs", R"("generate kerning pairs: "disabled", "basic", "regular" (tuned by hinter), "extended" (bigger output size, but more precise), default: "disabled")", cxxopts::value<std::string>(kerningPairs)->default_value("disabled"))
             ("monochrome", "disable anti-aliasing", cxxopts::value<bool>(config.monochrome))
+            ("hinting-mode", R"(hinting mode: "auto", "native", "none", default: "auto")", cxxopts::value<std::string>(hintingMode)->default_value("auto"))
             (textureSizeListOptionName, "list of texture sizes (will be tried from left to right to fit glyphs)", cxxopts::value<std::string>(textureSizeList))
             ("texture-crop-width", "crop unused parts of output textures (width)", cxxopts::value<bool>(config.cropTexturesWidth))
             ("texture-crop-height", "crop unused parts of output textures (height)", cxxopts::value<bool>(config.cropTexturesHeight))
@@ -117,6 +119,16 @@ Config ProgramOptions::parseCommandLine(int argc, char* argv[])
             config.textureNameSuffix = Config::TextureNameSuffix::None;
         else
             throw std::runtime_error("unknown --texture-name-suffix value");
+
+        std::transform(hintingMode.begin(), hintingMode.end(), hintingMode.begin(), tolower);
+        if (hintingMode == "auto")
+            config.hintingMode = Config::HintingMode::Auto;
+        else if (hintingMode == "native")
+            config.hintingMode = Config::HintingMode::Native;
+        else if (hintingMode == "none")
+            config.hintingMode = Config::HintingMode::None;
+        else
+            throw std::runtime_error("unknown --hinting-mode value");
 
         if (result.count(textureSizeListOptionName))
             config.textureSizeList = parseTextureSize(textureSizeList);

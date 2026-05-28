@@ -3,6 +3,7 @@
 #include <cmath>
 #include "FtInclude.h"
 #include "FtException.h"
+#include "../Config.h"
 #include "../utils/StringMaker.h"
 
 /* Handy routines for converting from fixed point */
@@ -41,8 +42,8 @@ public:
         std::int32_t rsbDelta;
     };
 
-    Font(Library& library, const std::string& fontFile, int ptsize, const int faceIndex, const bool monochrome)
-        : library(library), monochrome_(monochrome)
+    Font(Library& library, const std::string& fontFile, int ptsize, const int faceIndex, const bool monochrome, const Config::HintingMode hintingMode)
+        : library(library), monochrome_(monochrome), hintingMode_(hintingMode)
     {
         if (!library.library)
             throw std::runtime_error("Library is not initialized");
@@ -131,9 +132,20 @@ public:
     GlyphMetrics renderGlyph(std::uint32_t* buffer, std::uint32_t surfaceW, std::uint32_t surfaceH, int x, int y,
             std::uint32_t ch, std::uint32_t color) const
     {
-        FT_Int32 loadFlags = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
+        FT_Int32 loadFlags = FT_LOAD_RENDER;
+        switch (hintingMode_)
+        {
+            case Config::HintingMode::Auto:
+                loadFlags |= FT_LOAD_FORCE_AUTOHINT;
+                break;
+            case Config::HintingMode::Native:
+                break;
+            case Config::HintingMode::None:
+                loadFlags |= FT_LOAD_NO_HINTING;
+                break;
+        }
         if (monochrome_)
-            loadFlags |= FT_LOAD_MONOCHROME;
+            loadFlags |= FT_LOAD_TARGET_MONO | FT_LOAD_MONOCHROME;
 
         const int error = FT_Load_Char(face, ch, loadFlags);
         if (error)
@@ -319,6 +331,7 @@ public:
     int style;
     int outline;
     bool monochrome_;
+    Config::HintingMode hintingMode_;
 
     /* Whether kerning is desired */
     int kerning;
